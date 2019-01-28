@@ -37,6 +37,8 @@ func New(target, username, password string, passwordSet bool, props map[string]s
 			return nil, fmt.Errorf("SERVICE_REALM is not supported when using gssapi on %s", runtime.GOOS)
 		case "SERVICE_NAME":
 			serviceName = value
+		case "SERVICE_HOST":
+			target = value
 		default:
 			return nil, fmt.Errorf("unknown mechanism property %s", key)
 		}
