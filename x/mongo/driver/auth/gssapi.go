@@ -48,7 +48,7 @@ func (a *GSSAPIAuthenticator) Auth(ctx context.Context, desc description.Server,
 	target := desc.Addr.String()
 	hostname, _, err := net.SplitHostPort(target)
 	if err != nil {
-		return fmt.Errorf("invalid endpoint (%s) specified: %s", target, err)
+		return newAuthError(fmt.Sprintf("invalid endpoint (%s) specified", target), err)
 	}
 
 	client, err := gssapi.New(hostname, a.Username, a.Password, a.PasswordSet, a.Props)
