@@ -19,13 +19,12 @@ package gssapi
 import "C"
 import (
 	"fmt"
-	"net"
 	"runtime"
 	"strings"
 	"unsafe"
 )
 
-// New creates a new SaslClient.
+// New creates a new SaslClient. The target parameter should be a hostname with no port.
 func New(target, username, password string, passwordSet bool, props map[string]string) (*SaslClient, error) {
 	serviceName := "mongodb"
 
@@ -44,12 +43,7 @@ func New(target, username, password string, passwordSet bool, props map[string]s
 		}
 	}
 
-	hostname, _, err := net.SplitHostPort(target)
-	if err != nil {
-		return nil, fmt.Errorf("invalid endpoint (%s) specified: %s", target, err)
-	}
-
-	servicePrincipalName := fmt.Sprintf("%s@%s", serviceName, hostname)
+	servicePrincipalName := fmt.Sprintf("%s@%s", serviceName, target)
 
 	return &SaslClient{
 		servicePrincipalName: servicePrincipalName,

@@ -19,7 +19,7 @@ import (
 	"unsafe"
 )
 
-// New creates a new SaslClient.
+// New creates a new SaslClient. The target parameter should be a hostname with no port.
 func New(target, username, password string, passwordSet bool, props map[string]string) (*SaslClient, error) {
 	initOnce.Do(initSSPI)
 	if initError != nil {
@@ -43,25 +43,23 @@ func New(target, username, password string, passwordSet bool, props map[string]s
 			serviceRealm = value
 		case "SERVICE_NAME":
 			serviceName = value
+		case "SERVICE_HOST":
+			target = value
 		}
 	}
 
-	hostname, _, err := net.SplitHostPort(target)
-	if err != nil {
-		return nil, fmt.Errorf("invalid endpoint (%s) specified: %s", target, err)
-	}
 	if canonicalizeHostName {
-		names, err := net.LookupAddr(hostname)
+		names, err := net.LookupAddr(target)
 		if err != nil || len(names) == 0 {
 			return nil, fmt.Errorf("unable to canonicalize hostname: %s", err)
 		}
-		hostname = names[0]
-		if hostname[len(hostname)-1] == '.' {
-			hostname = hostname[:len(hostname)-1]
+		target = names[0]
+		if target[len(target)-1] == '.' {
+			target = target[:len(target)-1]
 		}
 	}
 
-	servicePrincipalName := fmt.Sprintf("%s/%s", serviceName, hostname)
+	servicePrincipalName := fmt.Sprintf("%s/%s", serviceName, target)
 	if serviceRealm != "" {
 		servicePrincipalName += "@" + serviceRealm
 	}
